@@ -1,0 +1,78 @@
+const mongoose = require('mongoose');
+
+const resumeSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  personalInfo: {
+    name: { type: String, default: '' },
+    email: { type: String, default: '' },
+    phone: { type: String, default: '' },
+    linkedin: { type: String, default: '' },
+    github: { type: String, default: '' },
+    portfolio: { type: String, default: '' },
+    location: { type: String, default: '' },
+  },
+  summary: { type: String, default: '' },
+  targetRole: { type: String, default: '' },
+  targetCompany: { type: String, default: '' },
+  skills: {
+    technical: [{ type: String }],
+    databases: [{ type: String }],
+    soft: [{ type: String }],
+    tools: [{ type: String }],
+    languages: [{ type: String }],
+  },
+  education: [{
+    institution: { type: String, default: '' },
+    degree: { type: String, default: '' },
+    branch: { type: String, default: '' },
+    cgpa: { type: String, default: '' },
+    startYear: { type: String, default: '' },
+    endYear: { type: String, default: '' },
+    location: { type: String, default: '' },
+    relevantCourses: [{ type: String }],
+  }],
+  experience: [{
+    company: { type: String, default: '' },
+    role: { type: String, default: '' },
+    startDate: { type: String, default: '' },
+    endDate: { type: String, default: '' },
+    location: { type: String, default: '' },
+    isCurrentRole: { type: Boolean, default: false },
+    points: [{ type: String }],
+    techUsed: [{ type: String }],
+  }],
+  projects: [{
+    name: { type: String, default: '' },
+    description: { type: String, default: '' },
+    techStack: [{ type: String }],
+    githubLink: { type: String, default: '' },
+    liveLink: { type: String, default: '' },
+    startDate: { type: String, default: '' },
+    endDate: { type: String, default: '' },
+    points: [{ type: String }],
+  }],
+  achievements: [{
+    title: { type: String, default: '' },
+    description: { type: String, default: '' },
+    year: { type: String, default: '' },
+    organization: { type: String, default: '' },
+  }],
+  certifications: [{
+    name: { type: String, default: '' },
+    issuer: { type: String, default: '' },
+    year: { type: String, default: '' },
+    credentialId: { type: String, default: '' },
+    link: { type: String, default: '' },
+  }],
+  extracurriculars: [{
+    title: { type: String, default: '' },
+    organization: { type: String, default: '' },
+    role: { type: String, default: '' },
+    duration: { type: String, default: '' },
+    description: { type: String, default: '' },
+  }],
+  lastAtsScore: { type: Number, default: null },
+  template: { type: String, default: 'modern' },
+}, { timestamps: true });
+
+module.exports = mongoose.model('Resume', resumeSchema);
