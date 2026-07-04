@@ -29,15 +29,19 @@ Use these pre-configured accounts to instantly explore the different platform da
 To prevent identity theft, the application enforces a secure, manual verification process for all new registrations. Follow these steps to test this workflow:
 
 ```mermaid
-sequenceDiagram
-    actor User as New User (Student/Alumni)
-    actor Admin as T&P Cell Administrator
-    
-    User->>Platform: 1. Register with roll number/email & upload ID card/document
-    Platform-->>User: Show "Application Submitted - Waiting for Verification"
-    Admin->>Platform: 2. Sign in & navigate to "Pending Requests"
-    Admin->>Platform: 3. Review user details, view ID document, and click Approve
-    User->>Platform: 4. Sign in now to access the full Dashboard!
+flowchart TD
+    A([User Registers]) --> B[Upload Verification Document]
+    B --> C[Account Created]
+    C --> D[Pending Verification]
+
+    D --> E[Admin Reviews Request]
+    E --> F{Approve?}
+
+    F -->|Yes| G[Activate Account]
+    G --> H[User Logs In]
+    H --> I([Access Dashboard])
+
+    F -->|No| J([Registration Rejected])
 ```
 
 ### Testing Steps:
