@@ -1,6 +1,8 @@
 # AlumniConnect 🎓🤝
 
-AlumniConnect is a premium, full-stack network platform designed to bridge the gap between students and verified alumni of **NIT Jamshedpur**. The application features dynamic referral request workflows, real-time platform analytics, AI-assisted resume building/ATS checking (powered by Groq), and an live, activity-driven alumni leaderboard.
+**AlumniConnect** is a production-ready, full-stack alumni networking platform built for **NIT Jamshedpur**, designed to foster meaningful connections between students and verified alumni. It provides a secure ecosystem where students can seek mentorship, request professional referrals, explore career opportunities, and accelerate their career journey with AI-powered tools.
+
+The platform combines document-based identity verification, JWT-secured role-based authentication, intelligent referral management, AI-powered Resume Builder and ATS Checker (Groq & Gemini), real-time notifications, contribution-based alumni leaderboards, and personalized dashboards to deliver a seamless networking experience.
 
 ---
 
@@ -106,7 +108,23 @@ sequenceDiagram
 
 ## 🌟 Key Features
 
-* **Manual Document Verification:** Combats identity theft by requiring students/alumni to upload official credentials (parsed/stored securely via Multer) before gaining system entry.
-* **AI Career Copilot:** AI Resume Builder and ATS Checker (built with Groq & Gemini APIs) that analyzes resumes against target job descriptions and generates real-time roadmaps.
-* **Real-time Leaderboard:** Dynamically calculates alumni contribution scores in real-time based on their actual platform activity (posting opportunities and approving referral requests).
-* **Platform Security:** Implements role-based route guards (Admins/Alumni/Students) and JWT authentication.
+- **🔐 Secure Alumni Verification**
+  - Prevents fake registrations through a manual document verification workflow. Students and alumni must upload official credentials, which are securely handled using Multer before admin approval grants platform access.
+
+- **🤖 AI Career Copilot**
+  - Integrated AI-powered Resume Builder and ATS Checker using Groq and Gemini APIs. Generates optimized resumes, evaluates ATS compatibility against target job descriptions, provides personalized improvement suggestions, and creates actionable career roadmaps.
+
+- **🏆 Real-Time Contribution Leaderboard**
+  - Automatically ranks alumni based on meaningful platform engagement, including posting job opportunities, approving referral requests, and mentoring students, encouraging active community participation through transparent scoring.
+
+- **🛡️ Enterprise-Grade Authentication & Authorization**
+  - Implements secure JWT-based authentication with role-based access control (Admin, Alumni, and Student), ensuring users can only access resources and features relevant to their permissions.
+
+- **💼 Alumni Networking & Referral System**
+  - Enables students to connect with verified alumni, request referrals, explore job opportunities, and build professional networks within a trusted community.
+
+- **📢 Job & Opportunity Portal**
+  - Verified alumni can post internships, full-time jobs, and career opportunities, while students can browse, apply, and track relevant openings from a centralized dashboard.
+
+- **📊 Personalized User Dashboard**
+  - Provides role-specific dashboards featuring referral requests, verification status, contribution metrics, notifications, and AI-powered career insights for an intuitive user experience.
