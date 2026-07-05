@@ -132,3 +132,7 @@ flowchart TD
 
 - **📊 Personalized User Dashboard**
   - Provides role-specific dashboards featuring referral requests, verification status, contribution metrics, notifications, and AI-powered career insights for an intuitive user experience.
+ 
+  - • 💬 Real-Time Chat & Networking
+
+  ○ Enables secure one-on-one conversations between students and verified alumni, allowing users to seek career guidance, discuss opportunities, request referrals, and build meaningful professional connections through an integrated real-time messaging system.
