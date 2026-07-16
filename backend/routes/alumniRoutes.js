@@ -6,6 +6,7 @@ const alumniController = require('../controllers/alumniController');
 router.get('/search', authMiddleware, alumniController.searchAlumni);
 router.get('/profile/:id', authMiddleware, alumniController.getAlumniProfile);
 router.get('/leaderboard', authMiddleware, alumniController.getLeaderboard);
+router.get('/students/search', authMiddleware, alumniController.searchStudents);
 
 router.post('/opportunity', authMiddleware, alumniController.postOpportunity);
 router.get('/opportunities', authMiddleware, alumniController.listOpportunities);

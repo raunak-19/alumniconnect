@@ -153,6 +153,7 @@ export default function AlumniDashboard({ user, setUser }) {
   const [referralStats, setReferralStats] = useState({ incoming: 0, posted: 0 });
   const [notifications, setNotifications] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [showProfileBanner, setShowProfileBanner] = useState(false);
 
   const fetchDashboardData = () => {
     const tk = token();
@@ -197,6 +198,15 @@ export default function AlumniDashboard({ user, setUser }) {
     fetchDashboardData();
     const interval = setInterval(fetchDashboardData, 10000);
     return () => clearInterval(interval);
+  }, [user]);
+
+  // Profile completion check
+  useEffect(() => {
+    if (!user) return;
+    const dismissed = sessionStorage.getItem('profile_banner_dismissed_alumni');
+    if (dismissed) return;
+    const isIncomplete = !user.department || !user.company || !user.designation || !(user.skills?.length > 0);
+    setShowProfileBanner(isIncomplete);
   }, [user]);
 
   // Rotate alumni every 4s
@@ -297,6 +307,32 @@ export default function AlumniDashboard({ user, setUser }) {
         {/* ── OVERVIEW ── */}
         {tab === 'overview' && (
           <div className="fade-in">
+            {/* Profile Completion Banner */}
+            {showProfileBanner && (
+              <div style={{
+                marginBottom: '1.5rem',
+                padding: '1rem 1.25rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08))',
+                border: '1px solid rgba(16,185,129,0.35)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>🌟</span>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9375rem', marginBottom: '0.125rem' }}>Your profile is incomplete!</div>
+                    <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Add your company, designation & skills so students can find you and request referrals.</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+                  <button className="btn btn-primary btn-sm" style={{ background: 'linear-gradient(135deg,#10b981,#059669)', border: 'none' }}
+                    onClick={() => handleTabChange('profile')}>Complete Profile →</button>
+                  <button onClick={() => { setShowProfileBanner(false); sessionStorage.setItem('profile_banner_dismissed_alumni', '1'); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1.25rem', lineHeight: 1 }}>×</button>
+                </div>
+              </div>
+            )}
+
             {/* Notification alert banner */}
             {unreadNotifications.length > 0 && (
               <div className="alert alert-success" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

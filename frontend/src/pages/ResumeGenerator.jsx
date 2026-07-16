@@ -15,7 +15,7 @@ const defaultResume = () => ({
   summary: '',
   targetRole: '',
   targetCompany: '',
-  skills: { technical: [], databases: [], soft: [], tools: [], languages: [] },
+  skills: { technical: [], databases: [], soft: [], tools: [], languages: [], custom: [] },
   education: [],
   experience: [],
   projects: [],
@@ -219,6 +219,9 @@ function ResumePreview({ data }) {
           {skills.tools?.length > 0 && <p><strong>Tools & Frameworks:</strong> {skills.tools.join(' • ')}</p>}
           {skills.languages?.length > 0 && <p><strong>Languages:</strong> {skills.languages.join(' • ')}</p>}
           {skills.soft?.length > 0 && <p><strong>Soft Skills:</strong> {skills.soft.join(' • ')}</p>}
+          {(skills.custom || []).map((cat, i) => cat.items?.length > 0 && (
+            <p key={i}><strong>{cat.label}:</strong> {cat.items.join(' • ')}</p>
+          ))}
         </>
       )}
 
@@ -657,7 +660,7 @@ export default function ResumeGenerator({ user, setUser }) {
               </div>
             </SectionWrapper>
 
-            {/* Skills */}
+            {/* ── Skills ── */}
             <SectionWrapper icon="⚙️" title="Skills">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', marginTop: '0.75rem' }}>
                 {[
@@ -672,6 +675,59 @@ export default function ResumeGenerator({ user, setUser }) {
                     <TagInput tags={resume.skills[sk.key] || []} onChange={tags => updateSkills(sk.key, tags)} placeholder={sk.ph} />
                   </div>
                 ))}
+
+                {/* Custom categories */}
+                {(resume.skills.custom || []).map((cat, idx) => (
+                  <div key={idx} style={{
+                    padding: '0.75rem', borderRadius: 'var(--radius-md)',
+                    border: '1px solid rgba(99,102,241,0.25)',
+                    background: 'rgba(99,102,241,0.04)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <input
+                        className="input input-sm"
+                        placeholder="Category name (e.g. Cloud, AI/ML, DSA)"
+                        value={cat.label}
+                        onChange={e => {
+                          const updated = [...(resume.skills.custom || [])];
+                          updated[idx] = { ...updated[idx], label: e.target.value };
+                          update('skills.custom', updated);
+                        }}
+                        style={{ flex: 1, marginRight: '0.5rem', fontWeight: 600 }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => {
+                          const updated = [...(resume.skills.custom || [])];
+                          updated.splice(idx, 1);
+                          update('skills.custom', updated);
+                        }}
+                      >🗑</button>
+                    </div>
+                    <TagInput
+                      tags={cat.items || []}
+                      onChange={items => {
+                        const updated = [...(resume.skills.custom || [])];
+                        updated[idx] = { ...updated[idx], items };
+                        update('skills.custom', updated);
+                      }}
+                      placeholder={`Add ${cat.label || 'skill'} and press Enter`}
+                    />
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  style={{ alignSelf: 'flex-start', borderStyle: 'dashed' }}
+                  onClick={() => {
+                    const updated = [...(resume.skills.custom || []), { label: '', items: [] }];
+                    update('skills.custom', updated);
+                  }}
+                >
+                  + Add Custom Category
+                </button>
               </div>
             </SectionWrapper>
 

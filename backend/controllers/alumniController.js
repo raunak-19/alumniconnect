@@ -83,6 +83,47 @@ exports.searchAlumni = async (req, res) => {
   }
 };
 
+// ─── Student Search ───────────────────────────────────────────────────────────
+exports.searchStudents = async (req, res) => {
+  try {
+    const { q, department } = req.query;
+    const { User, Profile } = getModels();
+
+    let studentUsers = await User.find({ role: 'student', isVerified: true });
+    let profiles = await Profile.find();
+
+    // Merge user+profile
+    let merged = studentUsers.map(u => {
+      const prof = profiles.find(p => p.user?.toString() === u._id?.toString());
+      return {
+        id: u._id,
+        email: u.email,
+        graduationYear: u.graduationYear,
+        name: prof?.name || u.email.split('@')[0],
+        department: prof?.department || '',
+        skills: prof?.skills || [],
+        isVerified: u.isVerified,
+      };
+    });
+
+    // Apply filters
+    if (q) {
+      const lq = q.toLowerCase();
+      merged = merged.filter(s =>
+        s.name.toLowerCase().includes(lq) ||
+        s.department.toLowerCase().includes(lq) ||
+        s.skills.some(sk => sk.toLowerCase().includes(lq))
+      );
+    }
+    if (department) merged = merged.filter(s => s.department.toLowerCase().includes(department.toLowerCase()));
+
+    res.json(merged);
+  } catch (e) {
+    console.error('searchStudents error:', e);
+    res.status(500).json({ error: 'Student search failed.' });
+  }
+};
+
 // ─── Get a single Alumni Profile ─────────────────────────────────────────────
 exports.getAlumniProfile = async (req, res) => {
   try {
