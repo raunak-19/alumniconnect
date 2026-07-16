@@ -12,6 +12,7 @@ const TABS = [
   { id: 'overview', label: '🏠 Overview' },
   { id: 'inbox', label: '💬 Messages' },
   { id: 'referrals', label: '🤝 Referral Portal & Directory' },
+  { id: 'students', label: '👥 Student Directory' },
   { id: 'resume', label: '📄 Resume Builder' },
   { id: 'copilot', label: '🤖 AI Assistant' },
   { id: 'profile', label: '👤 Profile' },
@@ -139,6 +140,208 @@ function ProfileSection({ user, onUpdate }) {
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Student Profile Modal ─────────────────────────────────────────────────
+function StudentProfileModal({ student, onClose, onConnect }) {
+  if (!student) return null;
+  const avatarGrads = [
+    'linear-gradient(135deg,#6366f1,#8b5cf6)',
+    'linear-gradient(135deg,#06b6d4,#0891b2)',
+    'linear-gradient(135deg,#f59e0b,#d97706)',
+    'linear-gradient(135deg,#10b981,#059669)',
+    'linear-gradient(135deg,#ec4899,#db2777)',
+  ];
+  const grad = avatarGrads[(student.name?.charCodeAt(0) || 0) % avatarGrads.length];
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '1rem',
+    }} onClick={onClose}>
+      <div className="card" style={{
+        width: '100%', maxWidth: '480px', position: 'relative',
+        border: '1px solid rgba(99,102,241,0.3)',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+      }} onClick={e => e.stopPropagation()}>
+        <div style={{
+          height: 72, borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(167,139,250,0.2))',
+          margin: '-1.5rem -1.5rem 0 -1.5rem', marginBottom: '1rem', position: 'relative',
+        }}>
+          <button onClick={onClose} style={{
+            position: 'absolute', top: 12, right: 16,
+            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem',
+          }}>×</button>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', marginTop: '-2rem' }}>
+            <div style={{
+              width: 60, height: 60, borderRadius: '50%',
+              background: grad,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 800, fontSize: '1.375rem', color: 'white',
+              border: '3px solid var(--bg-card)', boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            }}>
+              {(student.name || 'S')[0].toUpperCase()}
+            </div>
+          </div>
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <div style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.25rem' }}>{student.name}</div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {student.department && <span className="badge badge-blue">🎓 {student.department}</span>}
+            {student.graduationYear && <span className="badge badge-default">Class of {student.graduationYear}</span>}
+          </div>
+        </div>
+        {student.skills?.length > 0 && (
+          <div style={{ marginBottom: '1.25rem' }}>
+            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>SKILLS</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+              {student.skills.map(s => <span key={s} className="tag">{s}</span>)}
+            </div>
+          </div>
+        )}
+        <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center' }}
+          onClick={() => { onConnect(student); onClose(); }}>
+          💬 Connect (Message)
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Student Directory Tab ──────────────────────────────────────────────────
+function StudentDirectoryTab({ user }) {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQ, setSearchQ] = useState('');
+  const [searchDept, setSearchDept] = useState('');
+  const [connectTarget, setConnectTarget] = useState(null);
+  const [viewProfile, setViewProfile] = useState(null);
+
+  const avatarGrads = [
+    'linear-gradient(135deg,#6366f1,#8b5cf6)',
+    'linear-gradient(135deg,#06b6d4,#0891b2)',
+    'linear-gradient(135deg,#f59e0b,#d97706)',
+    'linear-gradient(135deg,#10b981,#059669)',
+    'linear-gradient(135deg,#ec4899,#db2777)',
+  ];
+  const getGrad = (name) => avatarGrads[(name?.charCodeAt(0) || 0) % avatarGrads.length];
+
+  const fetchStudents = async (q = '', dept = '') => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (q) params.append('q', q);
+      if (dept) params.append('department', dept);
+      const tk = localStorage.getItem('alumniconnect_token');
+      const res = await fetch(`${API_URL}/alumni/students/search?${params}`, {
+        headers: { Authorization: `Bearer ${tk}` }
+      });
+      const data = await res.json();
+      setStudents(Array.isArray(data) ? data.filter(s => s.id?.toString() !== user?.id?.toString() && s.id?.toString() !== user?._id?.toString()) : []);
+    } catch (e) {
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchStudents(); }, []);
+
+  return (
+    <div>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h2 className="page-title" style={{ marginBottom: '0.25rem' }}>Student Directory</h2>
+        <p className="page-subtitle">Connect with verified NIT JSR students</p>
+      </div>
+
+      {/* Search */}
+      <div className="card" style={{ marginBottom: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input className="input" placeholder="Search by name, department, or skill…"
+          value={searchQ} onChange={e => setSearchQ(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && fetchStudents(searchQ, searchDept)}
+          style={{ flex: 1, minWidth: '200px' }} />
+        <input className="input" placeholder="Department (e.g. CSE, EE)"
+          value={searchDept} onChange={e => setSearchDept(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && fetchStudents(searchQ, searchDept)}
+          style={{ width: '200px' }} />
+        <button className="btn btn-primary" onClick={() => fetchStudents(searchQ, searchDept)}>Search</button>
+      </div>
+
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {[1,2,3].map(n => <div key={n} className="card"><div className="skeleton" style={{ height: 70 }} /></div>)}
+        </div>
+      ) : students.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🎓</div>
+          No students found matching your search.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {students.map(student => (
+            <div key={student.id?.toString()} className="card" style={{ transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '240px', cursor: 'pointer' }}
+                  onClick={() => setViewProfile(student)}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: '50%',
+                    background: getGrad(student.name), flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, color: 'white', fontSize: '1.125rem',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                  }}>
+                    {(student.name || '?')[0].toUpperCase()}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.9375rem', marginBottom: '0.125rem' }}>{student.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      {student.department && <span>{student.department}</span>}
+                      {student.graduationYear && <span> · Class of {student.graduationYear}</span>}
+                    </div>
+                    {student.skills?.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginTop: '0.375rem' }}>
+                        {student.skills.slice(0, 4).map(s => <span key={s} className="tag" style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem' }}>{s}</span>)}
+                        {student.skills.length > 4 && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', alignSelf: 'center' }}>+{student.skills.length - 4}</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
+                  <button className="btn btn-ghost btn-sm" onClick={() => setViewProfile(student)} style={{ fontSize: '0.75rem' }}>
+                    View Profile
+                  </button>
+                  <button className="btn btn-outline btn-sm" onClick={() => setConnectTarget({ id: student.id?.toString(), name: student.name })} style={{ fontSize: '0.75rem' }}>
+                    💬 Connect
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {viewProfile && (
+        <StudentProfileModal
+          student={viewProfile}
+          onClose={() => setViewProfile(null)}
+          onConnect={(s) => setConnectTarget({ id: s.id?.toString(), name: s.name })}
+        />
+      )}
+
+      {connectTarget && (
+        <ConnectModal
+          recipient={connectTarget}
+          onClose={() => setConnectTarget(null)}
+        />
       )}
     </div>
   );
@@ -470,6 +673,7 @@ export default function AlumniDashboard({ user, setUser }) {
 
         {/* ── REFERRAL NETWORK & DIRECTORY (CONSOLIDATED) ── */}
         {tab === 'referrals' && <div className="fade-in"><ReferralPortal user={user} isAlumni={true} /></div>}
+        {tab === 'students' && <div className="fade-in"><StudentDirectoryTab user={user} /></div>}
         {tab === 'resume' && <div className="fade-in"><ResumeGenerator user={user} /></div>}
         {tab === 'copilot' && <div className="fade-in"><AICopilot user={user} /></div>}
         {tab === 'profile' && <div className="fade-in"><ProfileSection user={user} onUpdate={setUser} /></div>}
